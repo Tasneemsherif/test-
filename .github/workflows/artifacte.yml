@@ -63,12 +63,14 @@ jobs:
           name: app-build-and-reports
           # Optional: Define a target directory for the downloaded content
           path: ./downloaded-artifacts
+
+      - name: Confirm Artifact Download
         run: echo "Artifact 'app-build-and-reports' downloaded to ./downloaded-artifacts"
 
       - name: Verify Downloaded Artifacts and Prepare for Deployment
         run: |
           echo "--- Verifying Downloaded Structure ---"
-          ls -R ./downloaded-artifacts/
+          ls -R ./downloaded-artifacts/ 
           
           echo "--- Reading Application Build File (Proof of Transfer) ---"
           # Access the file using the specified download path and the original path structure
@@ -78,3 +80,12 @@ jobs:
           cat ./downloaded-artifacts/test-reports/report.json
           
           echo "--- Verification Complete: Ready for Deployment/Publishing ---"
+          # Example deployment simulation (replace with real deployment steps as needed)
+          echo "--- Simulating Deployment Step ---"
+          # For example, copy files to a "deployed" directory
+          mkdir -p ./deployed-app
+          cp -r ./downloaded-artifacts/build ./deployed-app/
+          cp -r ./downloaded-artifacts/test-reports ./deployed-app/
+          echo "Files deployed to ./deployed-app/"
+          ls -R ./deployed-app/
+
