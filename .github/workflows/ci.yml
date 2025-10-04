@@ -1,6 +1,9 @@
 name: Simple CI
 
-on: [push]
+on: 
+  push:
+    branches: [ feature ]
+  workflow_dispatch:
 
 jobs:
   test:

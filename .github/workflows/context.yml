@@ -1,0 +1,37 @@
+name: Lab - GitHub Context
+
+on:
+  push:
+    branches: [ feature ]
+  workflow_dispatch:
+
+jobs:
+  explore_context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Display Key GitHub Context Properties
+        run: |
+          # 1. Accessing the Event Name
+          echo "Triggering Event: ${{ github.event_name }}"
+          
+          # 2. Accessing the Repository Name
+          echo "Repository Full Name: ${{ github.repository }}"
+          
+          # 3. Accessing the Commit SHA (on push/pull_request)
+          echo "Commit SHA: ${{ github.sha }}"
+          
+          # 4. Accessing the Actor (user who triggered the workflow)
+          echo "Triggered by Actor: ${{ github.actor }}"
+          
+          # 5. Accessing Specific Event Payload Data (Example for a push event)
+          # Note: The 'github.event' context contains the *full* JSON payload of the event.
+          echo "Base Ref (if applicable, e.g., on PR): ${{ github.base_ref }}"
+          
+          # 6. Using expressions in an 'if' condition
+          # This step only runs if the event was 'push'
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "This was a PUSH event! Running push-specific logic."
+          fi
