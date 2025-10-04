@@ -1,0 +1,80 @@
+name: Artifact Management Lab (Upload/Download)
+
+# This workflow runs on every push to the main branch or can be triggered manually.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  # Job 1: Simulates a CI/Build job where artifacts are created and uploaded.
+  build_and_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Simulated Build Artifacts
+        run: |
+          echo "--- Simulating Build Output ---"
+          # Create a directory for the application binary
+          mkdir -p build
+          echo "Application build version 1.0.1 - Build ID ${{ github.run_id }}" > build/app.txt
+          
+          # Create a directory for test reports
+          mkdir -p test-reports
+          echo '{"tests_passed": 12, "failures": 0, "coverage": 95.5}' > test-reports/report.json
+          
+          echo "--- Artifacts created in workspace root ---"
+          ls -R
+
+      # 1. UPLOAD ARTIFACT (Saves the files to GitHub's artifact storage)
+      - name: Upload Build and Test Reports Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # REQUIRED: The unique name to identify this artifact bundle
+          name: app-build-and-reports
+          # REQUIRED: The path(s) to the file(s) or directories to upload
+          path: |
+            build
+            test-reports
+          # Optional: Set a short retention period for this lab exercise
+          retention-days: 1
+
+      - name: Confirm Artifact Upload
+        run: echo "Artifact 'app-build-and-reports' uploaded successfully."
+
+
+  # Job 2: Simulates a CD/Deployment job that needs the files from Job 1.
+  deploy_and_download:
+    # This job MUST wait for the 'build_and_upload' job to complete
+    needs: [build_and_upload]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository (Optional, but good for context)
+        uses: actions/checkout@v4
+
+      # 2. DOWNLOAD ARTIFACT (Retrieves the files from storage)
+      - name: Download Artifact from Build Job
+        uses: actions/download-artifact@v4
+        with:
+          # REQUIRED: Must match the name of the artifact uploaded in the previous job
+          name: app-build-and-reports
+          # Optional: Define a target directory for the downloaded content
+          path: ./downloaded-artifacts
+        run: echo "Artifact 'app-build-and-reports' downloaded to ./downloaded-artifacts"
+
+      - name: Verify Downloaded Artifacts and Prepare for Deployment
+        run: |
+          echo "--- Verifying Downloaded Structure ---"
+          ls -R ./downloaded-artifacts/
+          
+          echo "--- Reading Application Build File (Proof of Transfer) ---"
+          # Access the file using the specified download path and the original path structure
+          cat ./downloaded-artifacts/build/app.txt
+          
+          echo "--- Reading Test Report (Proof of Transfer) ---"
+          cat ./downloaded-artifacts/test-reports/report.json
+          
+          echo "--- Verification Complete: Ready for Deployment/Publishing ---"
