@@ -1,0 +1,27 @@
+name: CI - Cache Demo
+on:
+ push:
+   branches: [ main ]
+jobs:
+ cache-demo:
+   runs-on: ubuntu-latest
+   steps:
+     - uses: actions/checkout@v4
+
+
+     - name: Restore node_modules cache
+       uses: actions/cache@v4
+       with:
+         path: node_modules
+         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+         restore-keys: |
+           ${{ runner.os }}-node-
+     - name: Install (simulated)
+       run: |
+         echo "Simulating install..."
+         mkdir -p node_modules
+         echo "installed" > node_modules/dummy.txt
+
+
+     - name: Show cache contents
+       run: ls -la node_modules || true
