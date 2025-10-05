@@ -1,0 +1,50 @@
+name: Artifact Management Lab
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build_and_upload:
+    runs-on: ubuntu-latest
+    outputs:
+      sample_id: ${{ steps.make.outputs.build_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: make
+        name: Create simulated artifacts
+        run: |
+          mkdir -p build test-reports
+          echo "App build version 1.0.1 - Run ${{ github.run_id }}" > build/app.txt
+          echo '{"tests_passed": 12}' > test-reports/report.json
+          echo "build_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
+
+      - name: Upload app-build-and-reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build-and-reports
+          path: |
+            build
+            test-reports
+          retention-days: 1
+
+  deploy_and_download:
+    needs: [ build_and_upload ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (optional)
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build-and-reports
+          path: downloaded-artifacts
+
+      - name: Verify and simulate deploy
+        run: |
+          echo "Listing downloaded files"
+          ls -R downloaded-artifacts
+          cat downloaded-artifacts/build/app.txt
